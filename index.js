@@ -14,12 +14,21 @@ class CountdownTimer {
     }
     start() {
         const dedlineTime = this.targetDate;
-        setInterval(() => {
+        const IntervalID = setInterval(() => {
             const currentTime = Date.now()
             const deltaTime = dedlineTime - currentTime;
             const time = this.getTimeComponents(deltaTime);
             this.onTick(time)
+
+            if (deltaTime < 0) {
+                clearInterval(IntervalID)
+                refs.dayValue.textContent = '00';
+                refs.hourValue.textContent = '00';
+                refs.minutValue.textContent = '00';
+                refs.secondValue.textContent = '00';
+            }
         }, 1000);
+
     }
     getTimeComponents(time) {
         const secs = this.pad(Math.floor((time % (1000 * 60)) / 1000));
@@ -32,11 +41,12 @@ class CountdownTimer {
     pad(value) {
         return String(value).padStart(2, '0');
     }
+
 }
 
 const timer = new CountdownTimer({
     onTick: updateClock,
-    targetDate: new Date('Nov 21, 2021'),
+    targetDate: new Date('2021-11-21 00:00:00'),
 })
 
 timer.start();
