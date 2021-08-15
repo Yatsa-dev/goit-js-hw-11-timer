@@ -1,39 +1,49 @@
 'use stricts'
-// Плагин это класс CountdownTimer, экземпляр которого
-// создает новый таймер с настройками.
 
-// new CountdownTimer({
-//     selector: '#timer-1',
-//     targetDate: new Date('Jul 17, 2019'),
-// });
+refs = {
+    dayValue: document.querySelector('.value[data-value="days"]'),
+    hourValue: document.querySelector('.value[data-value="hours"]'),
+    minutValue: document.querySelector('.value[data-value="mins"]'),
+    secondValue: document.querySelector('.value[data-value="secs"]')
+}
 
-// Для подсчета значений используй следующие готовые формулы,
-//     где time - разница между targetDate и текущей датой.
+class CountdownTimer {
+    constructor({ onTick, targetDate }) {
+        this.onTick = onTick;
+        this.targetDate = targetDate;
+    }
+    start() {
+        const dedlineTime = this.targetDate;
+        setInterval(() => {
+            const currentTime = Date.now()
+            const deltaTime = dedlineTime - currentTime;
+            const time = this.getTimeComponents(deltaTime);
+            this.onTick(time)
+        }, 1000);
+    }
+    getTimeComponents(time) {
+        const secs = this.pad(Math.floor((time % (1000 * 60)) / 1000));
+        const mins = this.pad(Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)));
+        const hours = this.pad(Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+        const days = this.pad(Math.floor(time / (1000 * 60 * 60 * 24)));
 
-/*
- * Оставшиеся дни: делим значение UTC на 1000 * 60 * 60 * 24, количество
- * миллисекунд в одном дне (миллисекунды * секунды * минуты * часы)
- */
-// const days = Math.floor(time / (1000 * 60 * 60 * 24));
+        return { days, hours, mins, secs }
+    }
+    pad(value) {
+        return String(value).padStart(2, '0');
+    }
+}
 
-/*
- * Оставшиеся часы: получаем остаток от предыдущего расчета с помощью оператора
- * остатка % и делим его на количество миллисекунд в одном часе
- * (1000 * 60 * 60 = миллисекунды * минуты * секунды)
- */
-// const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+const timer = new CountdownTimer({
+    onTick: updateClock,
+    targetDate: new Date('Nov 21, 2021'),
+})
 
-/*
- * Оставшиеся минуты: получаем оставшиеся минуты и делим их на количество
- * миллисекунд в одной минуте (1000 * 60 = миллисекунды * секунды)
- */
-// const mins = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+timer.start();
 
-/*
- * Оставшиеся секунды: получаем оставшиеся секунды и делим их на количество
- * миллисекунд в одной секунде (1000)
- */
-// const secs = Math.floor((time % (1000 * 60)) / 1000);
-
-
-
+function updateClock({ days, hours, mins, secs }) {
+    refs.dayValue.textContent = days;
+    refs.hourValue.textContent = hours;
+    refs.minutValue.textContent = mins;
+    refs.secondValue.textContent = secs;
+}
